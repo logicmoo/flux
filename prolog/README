@@ -1,0 +1,228 @@
+******************************************************************************
+******************************************************************************
+******************************************************************************
+
+ALPprolog --- Action Logic Programs in Propositional Logic
+
+******************************************************************************
+******************************************************************************
+******************************************************************************
+
+Website:
+http://alpprolog.sourceforge.net
+
+Status:
+Stable
+
+Developer:
+conrad.drescher@web.de
+
+ALPprolog is a Prolog implementation of an action programming language.
+
+It requires ECLiPSe Prolog (available at http://www.eclipse-clp.org).
+
+It implements a fragment of the theoretical framework of Action Logic Programs
+as described in
+
+http://www.computational-logic.org/content/projects/wisslogpubs/DreSchiThi-FroCoS09.pdf
+
+
+******************************************************************************
+******************************************************************************
+Overview
+******************************************************************************
+******************************************************************************
+
+The fragment can be characterized as follows:
+
+* States are built from ground fluent (i.e. mutable) and non-fluent (also called 
+  auxiliary) properties using the logical connectives "and", "or", and "not".
+  We assume that there are only finitely many objects in the domain and make a
+  domain closure assumption. Hence states are a notational variant of classical
+  propositional logic.
+* An ALPprolog program describes the strategy of an agent that executes the program
+  online. Hence only simple substitutions are used for evaluating queries like
+  e.g. ?- holds(safe(Cell)). In the offline setting reasoning by cases via
+  disjunctive substitutions ensures that the Action Logic Program framework
+  becomes logically complete.
+* The agent can execute two kinds of actions: Physical actions that affect the
+  environment, and sensing actions that only affect the agent's knowledge thereof.
+  Sensing actions may result in disjunctive information --- e.g. one of the
+  surrounding cells might be safe, but it might not be clear which one. Physical
+  actions are assumed to be deterministic, i.e. there are no disjunctive effects.
+
+
+******************************************************************************
+******************************************************************************
+World descriptions with ALPprolog
+******************************************************************************
+******************************************************************************
+
+With ALPprolog you can program strategies for autonomous agents in
+dynamic domains. ALPprolog programs are ordinary Prolog programs with
+two additional predicates:
+
+* holds/1 to test whether some state property holds currently
+
+* execute/1 to execute some action
+
+An ALP describing a breadth first naive planning strategy is the following:
+
+strategy :- holds(goal).
+strategy :- do(A), strategy.
+
+In words if the goal description is satisfied at the current state then the
+strategy was successful. Otherwise we randomly pick some action A and keep on
+searching. As one can see ALP programs are read as temporally ordered sequences
+from left to right.
+
+******************************************************************************
+Required Files
+******************************************************************************
+
+
+The overall structure of an ALPprolog domain is as follows:
+
+(1) Create a module world.ecl --- describing the dynamic domain
+(2) Import this module into alpprolog.ecl
+(3) Create a file strategy.ecl importing world.ecl and alpprolog.ecl
+
+For illustration purposes with this distribution comes an implementation of 
+the Wumpus world with the respective files wumpus_world.ecl and 
+wumpus_strategy.ecl. Below is a brief explanation of the language features and 
+their use.
+
+******************************************************************************
+Sample Domain - Wumpus world
+******************************************************************************
+
+Let us first recall the wumpus world:
+The wumpus world is a well-known challenge problem in the reasoning about 
+action community. It consists of a grid-like world: cells may contain pits, one 
+cell contains gold, and one the fearsome Wumpus. The agent dies if she enters a 
+cell containing a pit or the Wumpus. But she carries one arrow so that she can 
+shoot the Wumpus from an adjacent cell. If the agent is next to a cell contain-
+ing a pit (the Wumpus), she can detect that one of the surrounding cells 
+contains a pit (the Wumpus), but doesn't know which one:
+She perceives a breeze if she is in a cell next to a pit, and she perceives a 
+stench if she is in a cell next to the Wumpus. She knows the contents of the 
+already visited cells --- in particular she can detect the gold if she is in 
+the same cell. Getting the gold without getting killed is the agent's goal.
+
+******************************************************************************
+world.ecl:
+******************************************************************************
+
+A world description is composed as follows:
+
+* Describe the initial state as a ground formula in prime implicate form:
+  A formula in conjunctive normal form is in prime implicate form iff it is
+  closed under resolution, subsumption, and tautology deletion. This should
+  be included as a Prolog fact: E.g. 
+
+           inital_state([at(agent,1),[at(wumpus,2),wumpus(3)]]). 
+
+  This Prolog fact describes the initial state 
+
+           at(agent,1) /\ ( at(wumpus,2) \/ at(wumpus,3) )
+
+  We know where the agent is, but the exact location of the fearsome wumpus
+  is unknown. This initial state talks about "fluents": These are the mutable 
+  properties of the dynamic domain. Formulas describing states are Prolog lists.
+  If a list element is a term it is a singleton clause, if it is a list it is
+  a disjunctive clause. A negated fluent is e.g. neg(alive(wumpus)).
+
+* Describe the actions, using action/3 facts. E.g. the fact
+
+           action(shoot,
+                  [carries(agent,arrow),
+                   at(wumpus,Cell1),
+                   at(agent,Cell2),
+                   connected(Cell2,Cell1)],
+                  [neg(carries(agent,arrow)),
+                   neg(alive(wumpus))]).
+
+  has the following meaning: The action "shoot" is possible if the agent is
+  currently armed, and next to a cell containing the wumpus. Finally, the
+  effects of the action are that the agent is no longer armed, and that the
+  wumpus gets killed.
+
+* You can define as many additional auxiliary static properties of the domain
+  as you like using Prolog clauses. These have to be listed in a fact
+
+           aux([connected]).
+
+  so that they can be distinguished from fluent properties (the default).
+
+* If the dynamic domain includes sensing then you have to first list the 
+  respective predicates, e.g.
+
+           sensors([glitter,stench]).
+
+  Describing sensor axioms is a little complicated. The meaning of an observation
+  depends both upon the sensing result and the agent's current state. For example,
+  the meaning of sensing whether an adjacent cell contains gold depends both on the
+  observation (Yes/No) and the agent's current location. This is the sensor axiom
+  for the wumpus agent that is trying to sense whether there is gold:
+
+  sensor_axiom(glitter(X),[ [X-true] -
+                            [at(agent,Y)] -
+                            [at(gold,Y)],
+                          
+                            [X-false] -
+                            [at(agent,Y)]-
+                            [neg(at(gold,Y))]
+                          ]).
+
+  This sensor has just two possible sensor values, true and false. The meaning
+  of the sensing result depends on the agents current location at(agent,Y).
+  If e.g. the sensing result was true then at(gold,Y) is adjoined to the
+  current state description. If the meaning of the sensor result does not
+  depend on the current state then the empty list may be used. In general, the
+  meaning may be described by any formula in prime implicate form. Variables may
+  be used provided that these can approriately grounded by evaluating the state
+  condition against the agent's current state knowledge. A sensing action
+  is performed simply by evaluating a non-ground sensed property.
+
+  For sensing to work in simulation you also have to provide a predicate
+  real_world/1. This is used by alpprolog.ecl to determine the appropriate
+  sensing results.
+
+
+******************************************************************************
+strategy.ecl:
+******************************************************************************
+
+A strategy is an arbitrary Prolog program, using the special predicates
+holds/1 and execute/1. See wumpus_strategy.ecl for an example.
+
+
+******************************************************************************
+A Guide to the Distribution
+******************************************************************************
+
+The directory 'ALPprolog' contains the files
+
+* wumpus_strategy.ecl
+* wumpus_world_small.ecl
+* wumpus_world_big.ecl
+* alpprolog.ecl
+
+Compile 'wumpus_strategy.ecl' and call 'main'. You can choose a world size in
+the files 'wumpus_world_*.ecl' (from 4x4 to 32x32).
+
+The 'small' world contains fewer ground fluents in the agents state
+representation, and the 'bigger' one contains much more (allow some time
+for compilation).
+
+If you want to use 'big' instead of 'small' adapt both 'wumpus_strategy.ecl'
+and 'alpprolog.ecl'.
+
+The subdirectory 'FluxVersion' contains two subdirectories, 'Ground' and 
+'Nonground'. 'Ground' is essentially the same as 'ALPprolog', only using Flux
+for the reasoning instead. Again, if you want to use 'big' instead of 'small' 
+adapt both 'wumpus_strategy.ecl' and 'flux.ecl'.
+
+'Nonground' uses quantification over variables to keep the state representation 
+small, and is much more efficient. Compile 'wumpus.pl' and call 'main'. You 
+can choose a world size in 'wumpus.pl'.
