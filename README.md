@@ -1,5 +1,27 @@
-# flux
-Hook and/or override assert, retract, call, clause, erase, etc for specific predicates
+# FLUX
+
+FLUX is a high-level programming system for cognitive agents of all
+kinds, including autonomous robots. Cognitive agents control themselves
+using an internal model of their environment. The FLUX kernel system
+endows agents with the general cognitive ability to reason about their
+actions and sensor data they acquire. FLUX agents are also able to plan
+ahead their actions in order to achieve specific goals. FLUX allows to
+implement complex strategies with concise and modular agent programs. An
+efficient constraint logic program, the FLUX system scales up well to
+domains which require large states and long action sequences.
+
+FLUX is an implementation of the Fluent Calculus. A versatile action
+representation formalism, this calculus provides a basic solution to
+the classical frame problem using the concept of state update axioms.
+
+The official FLUX project page is www.fluxagent.org
+
+This library is free software according to the GNU Library General Public
+License (GPL) 2. Please see the COPYING file for details.
+
+# ALPprolog 
+
+With ALPprolog you can program strategies for autonomous agents in dynamic domains like e.g. the Wumpus world.Hook and/or override assert, retract, call, clause, erase, etc for specific predicates
 
 
 # Installation
@@ -50,25 +72,6 @@ All rights reserved.
 
 General Information
 ===================
-
-FLUX is a high-level programming system for cognitive agents of all
-kinds, including autonomous robots. Cognitive agents control themselves
-using an internal model of their environment. The FLUX kernel system
-endows agents with the general cognitive ability to reason about their
-actions and sensor data they acquire. FLUX agents are also able to plan
-ahead their actions in order to achieve specific goals. FLUX allows to
-implement complex strategies with concise and modular agent programs. An
-efficient constraint logic program, the FLUX system scales up well to
-domains which require large states and long action sequences.
-
-FLUX is an implementation of the Fluent Calculus. A versatile action
-representation formalism, this calculus provides a basic solution to
-the classical frame problem using the concept of state update axioms.
-
-The official FLUX project page is www.fluxagent.org
-
-This library is free software according to the GNU Library General Public
-License (GPL) 2. Please see the COPYING file for details.
 
 
 Requirements
