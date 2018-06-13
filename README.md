@@ -21,8 +21,19 @@ License (GPL) 2. Please see the COPYING file for details.
 
 # ALPprolog 
 
-With ALPprolog you can program strategies for autonomous agents in dynamic domains like e.g. the Wumpus world.Hook and/or override assert, retract, call, clause, erase, etc for specific predicates
+ALPprolog is a Prolog implementation of an action programming language.
 
+With ALPprolog you can program strategies for autonomous agents in dynamic domains like e.g. the Wumpus world.Hook and/or override assert, retract, call, clause, erase, etc for specific predicates
+It requires SWI-Prolog (available at http://www.swi-prolog.org) or ECLiPSe Prolog (available at http://www.eclipse-clp.org).
+
+It implements a fragment of the theoretical framework of Action Logic Programs
+as described in http://www.computational-logic.org/content/projects/wisslogpubs/DreSchiThi-FroCoS09.pdf
+
+An ALPprolog program describes the strategy of an agent that executes the program
+online. Hence only simple substitutions are used for evaluating queries like
+e.g. ?- holds(safe(Cell)). In the offline setting reasoning by cases via
+disjunctive substitutions ensures that the Action Logic Program framework
+becomes logically complete.
 
 # Installation
 
@@ -39,6 +50,9 @@ Source code available and pull requests accepted at
 
 ```prolog
 ?- ensure_loaded(library(flux)).
+true.
+
+?- ensure_loaded(library(alpprolog)).
 true.
 
 ?- 
