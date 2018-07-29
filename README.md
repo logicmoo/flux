@@ -15,7 +15,7 @@ representation formalism, this calculus provides a basic solution to
 the classical frame problem using the concept of state update axioms.
 
 The official FLUX project page is https://web.archive.org/web/20070302104140/http://www.fluxagent.org:80/
- See also https://web.archive.org/web/*/http://www.fluxagent.org:80/*
+ See also [https://web.archive.org/web/*/http://www.fluxagent.org:80/*]
 
 This library is free software according to the GNU Library General Public
 License (GPL) 2. Please see the COPYING file for details.
